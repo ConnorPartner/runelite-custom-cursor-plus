@@ -148,7 +148,27 @@ public class CursorSizePlugin extends Plugin
                     source = weaponImage == null ? CursorImages.arrow() : weaponImage;
                 }
                 else { source = selected == null ? CursorImages.arrow() : selected.getCursorImage(); }
-                BufferedImage scaled = CursorImages.scale(source, config.size(), config.smooth());
+                int percentage = config.scalePercent();
+                // Preserve the old apparent size once, without treating pixel values as percentages.
+                if (!"true".equals(configManager.getConfiguration(CursorSizeConfig.GROUP, "percentageMigrated")))
+                {
+                    String legacy = configManager.getConfiguration(CursorSizeConfig.GROUP, "size");
+                    if (legacy != null && (selected != CustomCursor.EQUIPPED_WEAPON || weaponImage != null))
+                    {
+                        try
+                        {
+                            // RuneLite writes defaults before startup, so a null check is insufficient.
+                            if (percentage == 150) { percentage = CursorImages.legacyPercentage(source, Integer.parseInt(legacy)); }
+                            configManager.setConfiguration(CursorSizeConfig.GROUP, "percentageMigrated", true);
+                            configManager.setConfiguration(CursorSizeConfig.GROUP, "scalePercent", percentage);
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            log.warn("Ignoring invalid legacy cursor size");
+                        }
+                    }
+                }
+                BufferedImage scaled = CursorImages.scale(source, percentage, config.smooth());
                 Dimension nativeSize = Toolkit.getDefaultToolkit().getBestCursorSize(scaled.getWidth(), scaled.getHeight());
                 clientUI.setCursor(CursorImages.fitNativeCanvas(scaled, nativeSize), "Custom Cursor Plus");
                 nativeCursor = clientUI.getDefaultCursor();

@@ -24,10 +24,10 @@ final class CursorImages
         return image;
     }
 
-    static BufferedImage scale(BufferedImage source, int requestedSize, boolean smooth)
+    static BufferedImage scale(BufferedImage source, int requestedPercent, boolean smooth)
     {
-        int size = Math.max(8, Math.min(128, requestedSize));
-        double ratio = (double) size / Math.max(source.getWidth(), source.getHeight());
+        int percent = Math.max(25, Math.min(400, requestedPercent));
+        double ratio = Math.min(percent / 100.0, 512.0 / Math.max(source.getWidth(), source.getHeight()));
         int width = Math.max(1, (int) Math.round(source.getWidth() * ratio));
         int height = Math.max(1, (int) Math.round(source.getHeight() * ratio));
         BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -40,6 +40,13 @@ final class CursorImages
         }
         finally { g.dispose(); }
         return result;
+    }
+
+    static int legacyPercentage(BufferedImage source, int pixels)
+    {
+        int size = Math.max(8, Math.min(128, pixels));
+        return Math.max(25, Math.min(400, (int) Math.round(100.0 * size
+            / Math.max(source.getWidth(), source.getHeight()))));
     }
 
     // Padding prevents AWT from stretching small images to its native cursor size.
