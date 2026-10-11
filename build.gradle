@@ -1,0 +1,23 @@
+plugins { id 'java' }
+repositories {
+    maven { url = 'https://repo.runelite.net'; content { includeGroupByRegex('net\\.runelite.*') } }
+    mavenCentral()
+}
+def runeLiteVersion = 'latest.release'
+dependencies {
+    compileOnly "net.runelite:client:${runeLiteVersion}"
+    testImplementation "net.runelite:client:${runeLiteVersion}"
+    testImplementation 'junit:junit:4.13.2'
+}
+group = 'com.cursorsize'
+version = '1.0.0'
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release.set(11)
+}
+tasks.register('run', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.cursorsize.CursorSizeLauncher'
+    jvmArgs '-ea'
+    args '--developer-mode'
+}
