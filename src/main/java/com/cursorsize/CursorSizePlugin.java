@@ -34,7 +34,7 @@ import net.runelite.client.ui.ClientUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PluginDescriptor(name = "Custom Cursor Plus", description = "Make your cursor bigger or smaller", tags = {"mouse", "accessibility"}, enabledByDefault = false, conflicts = {"Custom Cursor"})
+@PluginDescriptor(name = "Custom Cursor Plus", description = "Make your cursor bigger or smaller", tags = {"mouse", "accessibility"}, conflicts = {"Custom Cursor"})
 public class CursorSizePlugin extends Plugin
 {
     private static final Logger log = LoggerFactory.getLogger(CursorSizePlugin.class);
