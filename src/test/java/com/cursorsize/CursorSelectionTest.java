@@ -10,7 +10,7 @@ public class CursorSelectionTest
 {
     @Test public void neverHidesNativeCursorOutsideLoggedInState()
     {
-        BufferedImage image = CursorImages.scale(CursorImages.arrow(), 128, false);
+        BufferedImage image = CursorImages.scale(CursorImages.arrow(), 400, false);
         assertFalse(CursorSizePlugin.useOverlay(false, image, new Dimension(32, 32)));
         assertTrue(CursorSizePlugin.useOverlay(true, image, new Dimension(32, 32)));
         assertFalse(CursorSizePlugin.useOverlay(true, image, new Dimension(128, 128)));
@@ -33,10 +33,10 @@ public class CursorSelectionTest
             if (style.builtIn == null) { continue; }
             assertSame(style.builtIn, style.selectedCursor(CustomCursor.RS3_SILVER));
             BufferedImage source = style.builtIn.getCursorImage();
-            for (int size : new int[]{8, 48, 128})
+            for (int size : new int[]{25, 100, 200, 400})
             {
                 BufferedImage scaled = CursorImages.scale(source, size, false);
-                assertEquals(size, Math.max(scaled.getWidth(), scaled.getHeight()));
+                assertEquals((int) Math.round(Math.max(source.getWidth(), source.getHeight()) * size / 100.0), Math.max(scaled.getWidth(), scaled.getHeight()));
                 boolean visible = false;
                 for (int y = 0; y < scaled.getHeight(); y++)
                 {
