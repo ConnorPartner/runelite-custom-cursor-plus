@@ -42,6 +42,7 @@ public class CursorSizePlugin extends Plugin
     @Inject private CursorSizeConfig config;
     @Inject private Client client;
     @Inject private CursorSizeOverlay overlay;
+    @Inject private CursorForegroundOverlay foregroundOverlay;
     @Inject private OverlayManager overlayManager;
     @Inject private ConfigManager configManager;
     @Inject private ClientThread clientThread;
@@ -63,6 +64,7 @@ public class CursorSizePlugin extends Plugin
         active = true;
         loggedIn = client.getGameState() == GameState.LOGGED_IN;
         overlayManager.add(overlay);
+        overlayManager.add(foregroundOverlay);
         updateCursor();
         refreshWeapon();
     }
@@ -72,6 +74,7 @@ public class CursorSizePlugin extends Plugin
     {
         active = false;
         overlayManager.remove(overlay);
+        overlayManager.remove(foregroundOverlay);
         if (SwingUtilities.isEventDispatchThread()) { resetCursor(); }
         else { SwingUtilities.invokeAndWait(this::resetCursor); }
     }
@@ -101,6 +104,12 @@ public class CursorSizePlugin extends Plugin
     public void onItemContainerChanged(ItemContainerChanged event)
     {
         if (active && event.getContainerId() == InventoryID.WORN) { refreshWeapon(); }
+    }
+
+    @Subscribe
+    public void onBeforeRender(net.runelite.api.events.BeforeRender event)
+    {
+        overlay.beginFrame();
     }
 
     private CustomCursor selectedCursor()
