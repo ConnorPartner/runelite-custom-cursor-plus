@@ -179,6 +179,7 @@ public class CursorSizePlugin extends Plugin
                     }
                 }
                 BufferedImage scaled = CursorImages.scale(source, percentage, config.smooth());
+                scaled = CursorImages.outline(scaled, config.outlineThickness(), config.outlineColor());
                 Dimension nativeSize = Toolkit.getDefaultToolkit().getBestCursorSize(scaled.getWidth(), scaled.getHeight());
                 clientUI.setCursor(CursorImages.fitNativeCanvas(scaled, nativeSize), "Custom Cursor Plus");
                 nativeCursor = clientUI.getDefaultCursor();

@@ -4,6 +4,9 @@ Keep your cursor easy to spot while you play. Custom Cursor Plus lets you choose
 
 ## Features
 
+- **Cursor outline:** choose a colour and thickness from 1–5 pixels to make your cursor easier to see. Set thickness to 0 (the default) to disable it. The outline is drawn inside the visible edge after scaling, so the click point and cursor dimensions stay unchanged. Thick outlines can cover fine details on small cursors.
+
+
 - **Adjustable scale:** choose from 25% to 400%, with 150% as the default.
 - **Familiar cursor styles:** Arrow, RS3 Gold, RS3 Silver, Dragon Dagger, Dragon Dagger (p), Trout, and Dragon Scimitar.
 - **Your own cursor:** use a custom PNG image.

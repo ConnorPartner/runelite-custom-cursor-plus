@@ -66,6 +66,46 @@ final class CursorImages
         return result;
     }
 
+    /** Inward outline: no padding, hotspot shift, or changes to the image's alpha mask. */
+    static BufferedImage outline(BufferedImage source, int requestedThickness, Color color)
+    {
+        int thickness = Math.max(0, Math.min(5, requestedThickness));
+        if (thickness == 0) { return source; }
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int[] pixels = source.getRGB(0, 0, width, height, null, 0, width);
+        int[] result = pixels.clone();
+        int rgb = (color == null ? Color.BLACK : color).getRGB() & 0x00ffffff;
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int index = y * width + x;
+                if ((pixels[index] >>> 24) == 0) { continue; }
+                boolean edge = false;
+                for (int dy = -thickness; dy <= thickness && !edge; dy++)
+                {
+                    for (int dx = -thickness; dx <= thickness; dx++)
+                    {
+                        if (dx * dx + dy * dy > thickness * thickness) { continue; }
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        if (nx < 0 || ny < 0 || nx >= width || ny >= height
+                            || (pixels[ny * width + nx] >>> 24) == 0)
+                        {
+                            edge = true;
+                            break;
+                        }
+                    }
+                }
+                if (edge) { result[index] = (pixels[index] & 0xff000000) | rgb; }
+            }
+        }
+        BufferedImage outlined = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        outlined.setRGB(0, 0, width, height, result, 0, width);
+        return outlined;
+    }
+
     static int legacyPercentage(BufferedImage source, int pixels)
     {
         int size = Math.max(8, Math.min(128, pixels));
