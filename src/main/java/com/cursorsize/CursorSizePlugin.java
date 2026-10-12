@@ -5,13 +5,13 @@ import java.awt.Dimension;
 import java.awt.Cursor;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
-import javax.imageio.ImageIO;
+
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import net.runelite.client.RuneLite;
+import net.runelite.client.util.Filepath;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.EquipmentInventorySlot;
@@ -34,7 +34,7 @@ import net.runelite.client.ui.ClientUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PluginDescriptor(name = "Custom Cursor Plus", description = "Make your cursor bigger or smaller", tags = {"mouse", "accessibility"}, conflicts = {"Custom Cursor"})
+@PluginDescriptor(name = "Custom Cursor Plus", internalName = "custom-cursor-plus", description = "Make your cursor bigger or smaller", tags = {"mouse", "accessibility"}, conflicts = {"Custom Cursor"})
 public class CursorSizePlugin extends Plugin
 {
     private static final Logger log = LoggerFactory.getLogger(CursorSizePlugin.class);
@@ -137,9 +137,10 @@ public class CursorSizePlugin extends Plugin
                 BufferedImage source;
                 if (selected == CustomCursor.CUSTOM_IMAGE)
                 {
-                    synchronized (ImageIO.class)
+                    Filepath imagePath = getPluginDirectory().join("cursor.png");
+                    try (InputStream input = imagePath.openInputStream())
                     {
-                        source = ImageIO.read(new File(RuneLite.RUNELITE_DIR, "cursor.png"));
+                        source = CursorImages.read(input);
                     }
                     if (source == null) { throw new IOException("cursor.png is not a supported image"); }
                 }
