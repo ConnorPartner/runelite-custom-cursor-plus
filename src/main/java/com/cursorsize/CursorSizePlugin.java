@@ -207,7 +207,9 @@ public class CursorSizePlugin extends Plugin
                 BufferedImage scaled = CursorImages.scale(source, percentage, config.smooth());
                 scaled = CursorImages.outline(scaled, config.outlineThickness(), config.outlineColor());
                 Dimension nativeSize = Toolkit.getDefaultToolkit().getBestCursorSize(scaled.getWidth(), scaled.getHeight());
-                clientUI.setCursor(CursorImages.fitNativeCanvas(scaled, nativeSize), "Custom Cursor Plus");
+                BufferedImage nativeImage = CursorImages.fitNativeCanvas(scaled, nativeSize);
+                clientUI.setCursor(nativeImage, "Custom Cursor Plus");
+                highlight.setCursorImage(useOverlay(loggedIn, scaled, nativeSize) ? scaled : nativeImage);
                 nativeCursor = clientUI.getDefaultCursor();
                 log.info("Custom Cursor Plus: style={}, selected={}, size={}x{}, native={}x{}, loggedIn={}, software={}",
                     config.style(), selected, scaled.getWidth(), scaled.getHeight(), nativeSize.width,
@@ -239,6 +241,7 @@ public class CursorSizePlugin extends Plugin
 
     private void resetCursor()
     {
+        highlight.setCursorImage(null);
         visibilityTimer.stop();
         transparentCursor = null;
         nativeCursor = null;

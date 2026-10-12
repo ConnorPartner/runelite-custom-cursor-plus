@@ -37,10 +37,10 @@ public interface CursorSizeConfig extends Config
     default Keybind highlightHotkey() { return Keybind.NOT_SET; }
 
     @ConfigItem(keyName = "highlightColor", name = "Highlight colour", description = "Colour of the locator ring.", position = 1, section = HIGHLIGHT_SECTION)
-    default Color highlightColor() { return Color.YELLOW; }
+    default Color highlightColor() { return Color.RED; }
 
     @Range(min = 10, max = 150)
-    @ConfigItem(keyName = "highlightRadius", name = "Ring radius", description = "Distance from the click point to the ring in pixels (10-150).", position = 2, section = HIGHLIGHT_SECTION)
+    @ConfigItem(keyName = "highlightRadius", name = "Ring radius", description = "Distance from the visible cursor centre to the ring in pixels (10-150).", position = 2, section = HIGHLIGHT_SECTION)
     default int highlightRadius() { return 40; }
 
     @Range(min = 100, max = 5000)

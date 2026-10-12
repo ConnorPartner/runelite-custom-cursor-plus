@@ -59,11 +59,11 @@ public class CursorHighlightTest
     {
         highlight.trigger();
         BufferedImage first = render();
-        assertEquals(Color.YELLOW.getRGB(), first.getRGB(90, 50));
+        assertEquals(Color.RED.getRGB(), first.getRGB(90, 50));
         assertEquals(0, first.getRGB(50, 50));
         mouse = new Point(100, 100);
         BufferedImage next = render();
-        assertEquals(Color.YELLOW.getRGB(), next.getRGB(140, 100));
+        assertEquals(Color.RED.getRGB(), next.getRGB(140, 100));
         assertEquals(0, next.getRGB(90, 50));
     }
 
@@ -105,5 +105,25 @@ public class CursorHighlightTest
             assertFalse(overlay.isRendering(now));
         }
         finally { graphics.dispose(); }
+    }
+    @Test public void centresOnVisiblePixelsAndUpdatesWithCursorSize()
+    {
+        BufferedImage cursor = new BufferedImage(60, 80, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D paint = cursor.createGraphics();
+        paint.setColor(Color.WHITE);
+        paint.fillRect(10, 20, 20, 40);
+        paint.dispose();
+        highlight.setCursorImage(cursor);
+        highlight.trigger();
+        // Visible centre is (20, 40), offset from the click point (50, 50).
+        assertEquals(Color.RED.getRGB(), render().getRGB(110, 90));
+        assertEquals(0, render().getRGB(90, 50));
+        highlight.setCursorImage(CursorImages.scale(cursor, 200, false));
+        assertEquals(Color.RED.getRGB(), render().getRGB(130, 130));
+        // Native padding must not move the visible centre.
+        highlight.setCursorImage(CursorImages.fitNativeCanvas(cursor, new java.awt.Dimension(100, 100)));
+        assertEquals(Color.RED.getRGB(), render().getRGB(110, 90));
+        highlight.setCursorImage(null);
+        assertEquals(Color.RED.getRGB(), render().getRGB(90, 50));
     }
 }
