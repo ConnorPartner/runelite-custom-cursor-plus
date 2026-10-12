@@ -31,6 +31,12 @@ Changes apply immediately. Disabling the plugin restores your normal cursor.
 
 Each style scales relative to its own image, so different cursors can look different sizes at the same percentage.
 
+## Find your cursor with a hotkey
+
+In **Cursor highlight**, assign a **Highlight hotkey**. While logged in, press it to show a ring around your cursor's click point. The ring follows your mouse in the game area and disappears automatically; press again to restart the timer.
+
+Choose a **Highlight colour**, **Ring radius** (10-150 pixels), and **Highlight duration (ms)** (100-5000 milliseconds). Defaults are a yellow ring with a 40-pixel radius lasting one second. The hotkey is unassigned until you choose one. The ring works with all cursor styles and scales, and clears when you switch away from the client or log out.
+
 ## Follow your existing cursor choice
 
 Select **Follow Custom Cursor** to use the style saved in RuneLite's original **Custom Cursor** settings. This includes **Equipped Weapon** and **Custom Image**.
