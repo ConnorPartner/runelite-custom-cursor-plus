@@ -2,10 +2,34 @@ package com.cursorsize;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 final class CursorImages
 {
     private CursorImages() {}
+
+    static BufferedImage read(InputStream input) throws IOException
+    {
+        // Explicit memory cache prevents ImageIO from creating temporary files.
+        synchronized (ImageIO.class)
+        {
+            try (MemoryCacheImageInputStream imageInput = new MemoryCacheImageInputStream(input))
+            {
+                java.util.Iterator<javax.imageio.ImageReader> readers = ImageIO.getImageReaders(imageInput);
+                if (!readers.hasNext()) { throw new IOException("cursor.png is not a supported image"); }
+                javax.imageio.ImageReader reader = readers.next();
+                try
+                {
+                    reader.setInput(imageInput);
+                    return reader.read(0);
+                }
+                finally { reader.dispose(); }
+            }
+        }
+    }
 
     static BufferedImage arrow()
     {
