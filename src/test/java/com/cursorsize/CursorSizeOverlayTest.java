@@ -33,7 +33,7 @@ public class CursorSizeOverlayTest
             });
         testClient = client;
         tooltipManager = new TooltipManager();
-        return new CursorSizeOverlay(client, tooltipManager);
+        return new CursorSizeOverlay(client, tooltipManager, new CursorHighlight(client, new CursorSizeConfig() {}));
     }
 
     private BufferedImage render(CursorSizeOverlay overlay)

@@ -21,15 +21,17 @@ import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 public class CursorSizeOverlay extends Overlay
 {
     private final Client client;
+    private final CursorHighlight highlight;
     private final TooltipManager tooltipManager;
     private volatile List<Tooltip> deferredTooltips = Collections.emptyList();
     private volatile BufferedImage image;
     private volatile long lastRenderNanos;
 
     @Inject
-    CursorSizeOverlay(Client client, TooltipManager tooltipManager)
+    CursorSizeOverlay(Client client, TooltipManager tooltipManager, CursorHighlight highlight)
     {
         this.client = client;
+        this.highlight = highlight;
         this.tooltipManager = tooltipManager;
         setPosition(OverlayPosition.DYNAMIC);
         // Capture tooltips before their normal pass; the final pass draws them after the cursor.
@@ -52,7 +54,7 @@ public class CursorSizeOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        if (image != null && !tooltipManager.getTooltips().isEmpty())
+        if ((image != null || highlight.isActive()) && !tooltipManager.getTooltips().isEmpty())
         {
             List<Tooltip> captured = new ArrayList<>(deferredTooltips);
             captured.addAll(tooltipManager.getTooltips());
@@ -73,6 +75,7 @@ public class CursorSizeOverlay extends Overlay
         deferredTooltips = Collections.emptyList();
         try
         {
+            highlight.render(graphics);
             return renderCursor(graphics);
         }
         finally
