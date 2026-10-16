@@ -205,18 +205,24 @@ public class CursorSizePlugin extends Plugin
                     }
                 }
                 BufferedImage scaled = CursorImages.scale(source, percentage, config.smooth());
+                scaled = CursorImages.mirror(scaled, config.mirrorHorizontal(), config.mirrorVertical());
                 scaled = CursorImages.outline(scaled, config.outlineThickness(), config.outlineColor());
                 Dimension nativeSize = Toolkit.getDefaultToolkit().getBestCursorSize(scaled.getWidth(), scaled.getHeight());
                 BufferedImage nativeImage = CursorImages.fitNativeCanvas(scaled, nativeSize);
-                clientUI.setCursor(nativeImage, "Custom Cursor Plus");
-                highlight.setCursorImage(useOverlay(loggedIn, scaled, nativeSize) ? scaled : nativeImage);
+                java.awt.Point nativeHotspot = CursorImages.hotspot(scaled, nativeSize,
+                    config.mirrorHorizontal(), config.mirrorVertical());
+                java.awt.Point overlayHotspot = CursorImages.hotspot(scaled,
+                    new Dimension(scaled.getWidth(), scaled.getHeight()), config.mirrorHorizontal(), config.mirrorVertical());
+                clientUI.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(nativeImage, nativeHotspot, "Custom Cursor Plus"));
+                boolean software = useOverlay(loggedIn, scaled, nativeSize);
+                highlight.setCursorImage(software ? scaled : nativeImage, software ? overlayHotspot : nativeHotspot);
                 nativeCursor = clientUI.getDefaultCursor();
                 log.info("Custom Cursor Plus: style={}, selected={}, size={}x{}, native={}x{}, loggedIn={}, software={}",
                     config.style(), selected, scaled.getWidth(), scaled.getHeight(), nativeSize.width,
                     nativeSize.height, loggedIn, useOverlay(loggedIn, scaled, nativeSize));
                 if (useOverlay(loggedIn, scaled, nativeSize))
                 {
-                    overlay.setImage(scaled);
+                    overlay.setImage(scaled, overlayHotspot);
                     BufferedImage blank = new BufferedImage(nativeSize.width, nativeSize.height, BufferedImage.TYPE_INT_ARGB);
                     transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(blank,
                         new java.awt.Point(0, 0), "Custom Cursor Plus overlay");

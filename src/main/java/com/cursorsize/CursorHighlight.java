@@ -38,6 +38,11 @@ class CursorHighlight
     // Ignore transparent padding, including the padding required by native cursors.
     void setCursorImage(BufferedImage image)
     {
+        setCursorImage(image, new java.awt.Point());
+    }
+
+    void setCursorImage(BufferedImage image, java.awt.Point hotspot)
+    {
         int minX = image == null ? 0 : image.getWidth();
         int minY = image == null ? 0 : image.getHeight();
         int maxX = -1;
@@ -56,7 +61,7 @@ class CursorHighlight
                 }
             }
         }
-        cursorCentre = maxX < 0 ? new Point(0, 0) : new Point((minX + maxX + 1) / 2, (minY + maxY + 1) / 2);
+        cursorCentre = maxX < 0 ? new Point(0, 0) : new Point((minX + maxX + 1) / 2 - hotspot.x, (minY + maxY + 1) / 2 - hotspot.y);
     }
 
     void trigger()

@@ -17,6 +17,9 @@ public interface CursorSizeConfig extends Config
     @ConfigSection(name = "Cursor highlight", description = "Find your cursor with a temporary ring.", position = 2)
     String HIGHLIGHT_SECTION = "highlight";
 
+    @ConfigSection(name = "Advanced", description = "Change the orientation of your cursor image.", position = 3)
+    String ADVANCED_SECTION = "advanced";
+
     @ConfigItem(keyName = "style", name = "Cursor style", description = "Follow Custom Cursor uses the cursor selected in RuneLite's Custom Cursor settings, including custom images and equipped weapons. Keep that plugin disabled.", position = 0, section = CURSOR_SECTION)
     default CursorStyle style() { return CursorStyle.FOLLOW_CUSTOM_CURSOR; }
 
@@ -26,6 +29,13 @@ public interface CursorSizeConfig extends Config
 
     @ConfigItem(keyName = "smooth", name = "Smooth scaling", description = "Smooth image edges; disable for crisp pixel art.", position = 2, section = CURSOR_SECTION)
     default boolean smooth() { return false; }
+
+    @ConfigItem(keyName = "mirrorHorizontal", name = "Mirror horizontally", description = "Flip the cursor image left to right. The click point mirrors with the image.", position = 0, section = ADVANCED_SECTION)
+    default boolean mirrorHorizontal() { return false; }
+
+    @ConfigItem(keyName = "mirrorVertical", name = "Mirror vertically", description = "Flip the cursor image top to bottom. The click point mirrors with the image.", position = 1, section = ADVANCED_SECTION)
+    default boolean mirrorVertical() { return false; }
+
     @Range(min = 0, max = 5)
     @ConfigItem(keyName = "outlineThickness", name = "Outline thickness", description = "Outline width in pixels after scaling (0–5). 0 disables it. Drawn inside the visible edge to preserve the click point.", position = 3, section = OUTLINE_SECTION)
     default int outlineThickness() { return 0; }
