@@ -66,6 +66,24 @@ final class CursorImages
         return result;
     }
 
+    /** Reflect the image without modifying shared built-in cursor images or losing alpha. */
+    static BufferedImage mirror(BufferedImage source, boolean horizontal, boolean vertical)
+    {
+        if (!horizontal && !vertical) { return source; }
+        int width = source.getWidth();
+        int height = source.getHeight();
+        BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                result.setRGB(x, y, source.getRGB(horizontal ? width - 1 - x : x,
+                    vertical ? height - 1 - y : y));
+            }
+        }
+        return result;
+    }
+
     /** Inward outline: no padding, hotspot shift, or changes to the image's alpha mask. */
     static BufferedImage outline(BufferedImage source, int requestedThickness, Color color)
     {
@@ -111,6 +129,15 @@ final class CursorImages
         int size = Math.max(8, Math.min(128, pixels));
         return Math.max(25, Math.min(400, (int) Math.round(100.0 * size
             / Math.max(source.getWidth(), source.getHeight()))));
+    }
+
+    static Point hotspot(BufferedImage image, Dimension canvas, boolean horizontal, boolean vertical)
+    {
+        double ratio = Math.min(1.0, Math.min((double) canvas.width / image.getWidth(),
+            (double) canvas.height / image.getHeight()));
+        int width = Math.max(1, (int) Math.round(image.getWidth() * ratio));
+        int height = Math.max(1, (int) Math.round(image.getHeight() * ratio));
+        return new Point(horizontal ? width - 1 : 0, vertical ? height - 1 : 0);
     }
 
     // Padding prevents AWT from stretching small images to its native cursor size.

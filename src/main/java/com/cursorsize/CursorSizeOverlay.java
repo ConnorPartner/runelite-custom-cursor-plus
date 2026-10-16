@@ -25,6 +25,7 @@ public class CursorSizeOverlay extends Overlay
     private final TooltipManager tooltipManager;
     private volatile List<Tooltip> deferredTooltips = Collections.emptyList();
     private volatile BufferedImage image;
+    private java.awt.Point hotspot = new java.awt.Point();
     private volatile long lastRenderNanos;
 
     @Inject
@@ -41,6 +42,12 @@ public class CursorSizeOverlay extends Overlay
 
     void setImage(BufferedImage image)
     {
+        setImage(image, new java.awt.Point());
+    }
+
+    synchronized void setImage(BufferedImage image, java.awt.Point hotspot)
+    {
+        this.hotspot = new java.awt.Point(hotspot);
         this.image = image;
         lastRenderNanos = 0;
         if (image == null) { deferredTooltips = Collections.emptyList(); }
@@ -86,15 +93,17 @@ public class CursorSizeOverlay extends Overlay
         }
     }
 
-    Dimension renderCursor(Graphics2D graphics)
+    synchronized Dimension renderCursor(Graphics2D graphics)
     {
         BufferedImage current = image;
         Point mouse = client.getMouseCanvasPosition();
+        int x = mouse.getX() - hotspot.x;
+        int y = mouse.getY() - hotspot.y;
         if (current != null && mouse.getX() >= 0 && mouse.getY() >= 0
             && mouse.getX() < client.getCanvasWidth() && mouse.getY() < client.getCanvasHeight()
-            && graphics.hitClip(mouse.getX(), mouse.getY(), current.getWidth(), current.getHeight()))
+            && graphics.hitClip(x, y, current.getWidth(), current.getHeight()))
         {
-            graphics.drawImage(current, mouse.getX(), mouse.getY(), null);
+            graphics.drawImage(current, x, y, null);
             lastRenderNanos = System.nanoTime();
         }
         return null;
