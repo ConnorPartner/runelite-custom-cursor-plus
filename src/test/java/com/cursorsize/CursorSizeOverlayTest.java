@@ -130,6 +130,22 @@ public class CursorSizeOverlayTest
         }
     }
 
+    @Test public void mirroredTipStaysAtMousePosition()
+    {
+        CursorSizeOverlay cursor = overlay();
+        for (boolean horizontal : new boolean[]{false, true})
+        {
+            for (boolean vertical : new boolean[]{false, true})
+            {
+                BufferedImage source = new BufferedImage(10, 8, BufferedImage.TYPE_INT_ARGB);
+                source.setRGB(0, 0, 0xffff0000);
+                BufferedImage mirrored = CursorImages.mirror(source, horizontal, vertical);
+                cursor.setImage(mirrored, CursorImages.hotspot(source, new java.awt.Dimension(10, 8), horizontal, vertical));
+                assertEquals(0xffff0000, render(cursor).getRGB(12, 14));
+            }
+        }
+    }
+
     @Test public void inactiveCursorLeavesTooltipsAlone()
     {
         CursorSizeOverlay cursor = overlay();
