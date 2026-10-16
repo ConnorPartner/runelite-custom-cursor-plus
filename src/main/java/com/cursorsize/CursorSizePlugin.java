@@ -12,6 +12,8 @@ import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import net.runelite.client.util.Filepath;
+import net.runelite.client.util.HotkeyListener;
+import net.runelite.client.input.KeyManager;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.EquipmentInventorySlot;
@@ -47,6 +49,23 @@ public class CursorSizePlugin extends Plugin
     @Inject private ConfigManager configManager;
     @Inject private ClientThread clientThread;
     @Inject private ItemManager itemManager;
+    @Inject private KeyManager keyManager;
+    @Inject private CursorHighlight highlight;
+    private final HotkeyListener highlightListener = new HotkeyListener(() -> config.highlightHotkey())
+    {
+        @Override
+        public void hotkeyPressed()
+        {
+            if (active && loggedIn) { highlight.trigger(); }
+        }
+
+        @Override
+        public void focusLost()
+        {
+            super.focusLost();
+            highlight.clear();
+        }
+    };
     private volatile boolean active;
     private volatile boolean loggedIn;
     private volatile BufferedImage weaponImage;
@@ -61,7 +80,9 @@ public class CursorSizePlugin extends Plugin
     @Override
     protected void startUp()
     {
+        highlight.clear();
         active = true;
+        keyManager.registerKeyListener(highlightListener);
         loggedIn = client.getGameState() == GameState.LOGGED_IN;
         overlayManager.add(overlay);
         overlayManager.add(foregroundOverlay);
@@ -73,6 +94,8 @@ public class CursorSizePlugin extends Plugin
     protected void shutDown() throws Exception
     {
         active = false;
+        keyManager.unregisterKeyListener(highlightListener);
+        highlightListener.focusLost();
         overlayManager.remove(overlay);
         overlayManager.remove(foregroundOverlay);
         if (SwingUtilities.isEventDispatchThread()) { resetCursor(); }
@@ -82,6 +105,8 @@ public class CursorSizePlugin extends Plugin
     @Subscribe
     public void onConfigChanged(ConfigChanged event)
     {
+        // Highlight settings are read live and do not require rebuilding the cursor image.
+        if (CursorSizeConfig.GROUP.equals(event.getGroup()) && event.getKey().startsWith("highlight")) { return; }
         if ((CursorSizeConfig.GROUP.equals(event.getGroup()) || "customcursor".equals(event.getGroup())) && active)
         {
             updateCursor();
@@ -93,6 +118,7 @@ public class CursorSizePlugin extends Plugin
     public void onGameStateChanged(GameStateChanged event)
     {
         loggedIn = event.getGameState() == GameState.LOGGED_IN;
+        if (!loggedIn) { highlight.clear(); }
         if (active)
         {
             updateCursor();
@@ -179,16 +205,24 @@ public class CursorSizePlugin extends Plugin
                     }
                 }
                 BufferedImage scaled = CursorImages.scale(source, percentage, config.smooth());
+                scaled = CursorImages.mirror(scaled, config.mirrorHorizontal(), config.mirrorVertical());
                 scaled = CursorImages.outline(scaled, config.outlineThickness(), config.outlineColor());
                 Dimension nativeSize = Toolkit.getDefaultToolkit().getBestCursorSize(scaled.getWidth(), scaled.getHeight());
-                clientUI.setCursor(CursorImages.fitNativeCanvas(scaled, nativeSize), "Custom Cursor Plus");
+                BufferedImage nativeImage = CursorImages.fitNativeCanvas(scaled, nativeSize);
+                java.awt.Point nativeHotspot = CursorImages.hotspot(scaled, nativeSize,
+                    config.mirrorHorizontal(), config.mirrorVertical());
+                java.awt.Point overlayHotspot = CursorImages.hotspot(scaled,
+                    new Dimension(scaled.getWidth(), scaled.getHeight()), config.mirrorHorizontal(), config.mirrorVertical());
+                clientUI.setCursor(Toolkit.getDefaultToolkit().createCustomCursor(nativeImage, nativeHotspot, "Custom Cursor Plus"));
+                boolean software = useOverlay(loggedIn, scaled, nativeSize);
+                highlight.setCursorImage(software ? scaled : nativeImage, software ? overlayHotspot : nativeHotspot);
                 nativeCursor = clientUI.getDefaultCursor();
                 log.info("Custom Cursor Plus: style={}, selected={}, size={}x{}, native={}x{}, loggedIn={}, software={}",
                     config.style(), selected, scaled.getWidth(), scaled.getHeight(), nativeSize.width,
                     nativeSize.height, loggedIn, useOverlay(loggedIn, scaled, nativeSize));
                 if (useOverlay(loggedIn, scaled, nativeSize))
                 {
-                    overlay.setImage(scaled);
+                    overlay.setImage(scaled, overlayHotspot);
                     BufferedImage blank = new BufferedImage(nativeSize.width, nativeSize.height, BufferedImage.TYPE_INT_ARGB);
                     transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(blank,
                         new java.awt.Point(0, 0), "Custom Cursor Plus overlay");
@@ -213,6 +247,7 @@ public class CursorSizePlugin extends Plugin
 
     private void resetCursor()
     {
+        highlight.setCursorImage(null);
         visibilityTimer.stop();
         transparentCursor = null;
         nativeCursor = null;

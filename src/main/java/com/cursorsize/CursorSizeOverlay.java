@@ -21,15 +21,18 @@ import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 public class CursorSizeOverlay extends Overlay
 {
     private final Client client;
+    private final CursorHighlight highlight;
     private final TooltipManager tooltipManager;
     private volatile List<Tooltip> deferredTooltips = Collections.emptyList();
     private volatile BufferedImage image;
+    private java.awt.Point hotspot = new java.awt.Point();
     private volatile long lastRenderNanos;
 
     @Inject
-    CursorSizeOverlay(Client client, TooltipManager tooltipManager)
+    CursorSizeOverlay(Client client, TooltipManager tooltipManager, CursorHighlight highlight)
     {
         this.client = client;
+        this.highlight = highlight;
         this.tooltipManager = tooltipManager;
         setPosition(OverlayPosition.DYNAMIC);
         // Capture tooltips before their normal pass; the final pass draws them after the cursor.
@@ -39,6 +42,12 @@ public class CursorSizeOverlay extends Overlay
 
     void setImage(BufferedImage image)
     {
+        setImage(image, new java.awt.Point());
+    }
+
+    synchronized void setImage(BufferedImage image, java.awt.Point hotspot)
+    {
+        this.hotspot = new java.awt.Point(hotspot);
         this.image = image;
         lastRenderNanos = 0;
         if (image == null) { deferredTooltips = Collections.emptyList(); }
@@ -52,7 +61,7 @@ public class CursorSizeOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        if (image != null && !tooltipManager.getTooltips().isEmpty())
+        if ((image != null || highlight.isActive()) && !tooltipManager.getTooltips().isEmpty())
         {
             List<Tooltip> captured = new ArrayList<>(deferredTooltips);
             captured.addAll(tooltipManager.getTooltips());
@@ -73,6 +82,7 @@ public class CursorSizeOverlay extends Overlay
         deferredTooltips = Collections.emptyList();
         try
         {
+            highlight.render(graphics);
             return renderCursor(graphics);
         }
         finally
@@ -83,15 +93,17 @@ public class CursorSizeOverlay extends Overlay
         }
     }
 
-    Dimension renderCursor(Graphics2D graphics)
+    synchronized Dimension renderCursor(Graphics2D graphics)
     {
         BufferedImage current = image;
         Point mouse = client.getMouseCanvasPosition();
+        int x = mouse.getX() - hotspot.x;
+        int y = mouse.getY() - hotspot.y;
         if (current != null && mouse.getX() >= 0 && mouse.getY() >= 0
             && mouse.getX() < client.getCanvasWidth() && mouse.getY() < client.getCanvasHeight()
-            && graphics.hitClip(mouse.getX(), mouse.getY(), current.getWidth(), current.getHeight()))
+            && graphics.hitClip(x, y, current.getWidth(), current.getHeight()))
         {
-            graphics.drawImage(current, mouse.getX(), mouse.getY(), null);
+            graphics.drawImage(current, x, y, null);
             lastRenderNanos = System.nanoTime();
         }
         return null;

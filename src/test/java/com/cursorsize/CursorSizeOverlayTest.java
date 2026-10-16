@@ -33,7 +33,7 @@ public class CursorSizeOverlayTest
             });
         testClient = client;
         tooltipManager = new TooltipManager();
-        return new CursorSizeOverlay(client, tooltipManager);
+        return new CursorSizeOverlay(client, tooltipManager, new CursorHighlight(client, new CursorSizeConfig() {}));
     }
 
     private BufferedImage render(CursorSizeOverlay overlay)
@@ -127,6 +127,22 @@ public class CursorSizeOverlayTest
             assertEquals(java.awt.Color.BLUE.getRGB(), output.getRGB(0, 0));
             assertTrue(cursor.isRendering(System.nanoTime()));
             assertTrue(tooltipManager.getTooltips().isEmpty());
+        }
+    }
+
+    @Test public void mirroredTipStaysAtMousePosition()
+    {
+        CursorSizeOverlay cursor = overlay();
+        for (boolean horizontal : new boolean[]{false, true})
+        {
+            for (boolean vertical : new boolean[]{false, true})
+            {
+                BufferedImage source = new BufferedImage(10, 8, BufferedImage.TYPE_INT_ARGB);
+                source.setRGB(0, 0, 0xffff0000);
+                BufferedImage mirrored = CursorImages.mirror(source, horizontal, vertical);
+                cursor.setImage(mirrored, CursorImages.hotspot(source, new java.awt.Dimension(10, 8), horizontal, vertical));
+                assertEquals(0xffff0000, render(cursor).getRGB(12, 14));
+            }
         }
     }
 
