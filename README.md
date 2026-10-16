@@ -31,6 +31,12 @@ Changes apply immediately. Disabling the plugin restores your normal cursor.
 
 Each style scales relative to its own image, so different cursors can look different sizes at the same percentage.
 
+## Mirror your cursor
+
+Under **Advanced**, enable **Mirror horizontally** to flip the image left to right, or **Mirror vertically** to flip it top to bottom. Enable both for a 180-degree rotation. Both options are off by default and work with every cursor style, custom PNGs, and equipped-weapon cursors.
+
+Mirroring applies immediately and works with scaling, outlines, and the cursor highlight. The click point mirrors with the image, keeping the original pointer tip aligned with your clicks. This works for both native and enlarged in-game cursors.
+
 ## Find your cursor with a hotkey
 
 In **Cursor highlight**, assign a **Highlight hotkey**. While logged in, press it to show a ring around the centre of your visible cursor. The ring follows your mouse in the game area and disappears automatically; press again to restart the timer.
@@ -63,7 +69,7 @@ After adding or replacing the image, change a plugin setting or toggle the plugi
 
 If you previously used `.runelite/cursor.png`, copy it into the new folder. A missing or unreadable image falls back to the normal cursor.
 
-For best results, use a transparent background with little empty space around the image. The click point is the image's top-left corner. Very large images are limited to 512 pixels on their longest edge, keeping their proportions.
+For best results, use a transparent background with little empty space around the image. The click point starts at the image's top-left corner and mirrors with the image when mirroring is enabled. Very large images are limited to 512 pixels on their longest edge, keeping their proportions.
 
 ## Why does the cursor look smaller on the login screen or sidebar?
 
